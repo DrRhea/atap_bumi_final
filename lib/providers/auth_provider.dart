@@ -7,11 +7,14 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   bool _isLoading = false;
   String? _errorMessage;
+  String? _redirectUrl;
 
   User? get user => _user;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  String? get redirectUrl => _redirectUrl;
   bool get isLoggedIn => _user != null;
+  bool get isAdmin => _user?.role == 'admin';
 
   Future<bool> login(String email, String password) async {
     _setLoading(true);
@@ -22,6 +25,7 @@ class AuthProvider extends ChangeNotifier {
       if (response['success']) {
         final userData = response['data'];
         _user = User.fromJson(userData['user']);
+        _redirectUrl = userData['redirect_url'];
         await StorageService.setAccessToken(userData['token']);
         await StorageService.setUserData(userData['user']);
         await StorageService.setLoggedIn(true);
@@ -154,4 +158,22 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void clearError() => _clearError();
+
+  // Get target route after login based on user role and redirect URL
+  String getPostLoginRoute() {
+    // Check if user is admin
+    if (_user?.isAdmin == true) {
+      return '/admin/dashboard';
+    }
+
+    // Check redirect URL from backend
+    if (_redirectUrl != null && _redirectUrl!.isNotEmpty) {
+      if (_redirectUrl!.contains('/admin')) {
+        return '/admin/dashboard';
+      }
+    }
+
+    // Default to home for regular users
+    return '/home';
+  }
 }

@@ -56,4 +56,9 @@ class User {
       'updated_at': updatedAt?.toIso8601String(),
     };
   }
+
+  // Helper methods
+  bool get isAdmin => role == 'admin';
+  bool get isUser => role == 'user';
 }
+
