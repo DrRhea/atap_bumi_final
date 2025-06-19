@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/admin_service.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../routes/app_routes.dart';
 import '../chat/admin_chat_screen.dart';
 import '../transactions/admin_transactions_screen.dart';
 import '../reports/admin_reports_screen.dart';
@@ -50,6 +51,140 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         isLoading = false;
       });
     }
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 10,
+          backgroundColor: Colors.white,
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEBEE),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.logout_rounded,
+                  color: Color(0xFFE53E3E),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Confirm Logout',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Alexandria',
+                  color: Color(0xFF1E293B),
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Are you sure you want to logout from admin dashboard?',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Alexandria',
+              color: Color(0xFF64748B),
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Alexandria',
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close dialog first
+                
+                // Show loading
+                if (mounted) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                try {
+                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  await authProvider.logout();
+                  
+                  if (mounted) {
+                    // Close loading dialog
+                    Navigator.of(context).pop();
+                    
+                    // Navigate to sign in and clear all routes
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRoutes.signIn,
+                      (route) => false,
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    // Close loading dialog
+                    Navigator.of(context).pop();
+                    
+                    // Show error
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Logout failed: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE53E3E),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Alexandria',
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -112,19 +247,71 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              if (mounted) {
-                Navigator.pushReplacementNamed(context, '/login');
-              }
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              return PopupMenuButton<void>(
+                icon: const Icon(
+                  Icons.account_circle,
+                  color: Color(0xFF64748B),
+                  size: 28,
+                ),
+                offset: const Offset(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.person_outline,
+                          color: Color(0xFF64748B),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          authProvider.user?.fullName ?? 'Admin',
+                          style: const TextStyle(
+                            fontFamily: 'Alexandria',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () {},
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.logout_outlined,
+                          color: Color(0xFFE53E3E),
+                          size: 20,
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: Color(0xFFE53E3E),
+                            fontFamily: 'Alexandria',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      // Use Future.delayed to show dialog after popup closes
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        _showLogoutDialog();
+                      });
+                    },
+                  ),
+                ],
+              );
             },
-            icon: const Icon(
-              Icons.logout,
-              color: Color(0xFF64748B),
-            ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: isLoading
