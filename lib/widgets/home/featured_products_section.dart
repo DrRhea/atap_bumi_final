@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/equipment_provider.dart';
 import '../../models/equipment.dart';
 import '../../screens/category/category_screen.dart';
+import '../../screens/category/detail_product/detail_product_screen.dart';
 import 'section_header.dart';
 import 'product_card.dart';
 
@@ -75,10 +76,20 @@ class _FeaturedProductsSectionState extends State<FeaturedProductsSection> {
               ),
               itemCount: products.length,
               itemBuilder: (context, index) {
-                try {
+                try {                  final equipment = products[index];
                   return ProductCard(
-                    product: _equipmentToProductMap(products[index]),
+                    product: _equipmentToProductMap(equipment),
                     screenWidth: widget.screenWidth,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailProductScreen(
+                            equipment: equipment,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 } catch (e) {
                   print('Error building product card: $e');
