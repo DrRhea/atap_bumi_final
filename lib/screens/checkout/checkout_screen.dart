@@ -473,13 +473,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                         width: 60,
                         height: 60,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3B82F6).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
-                          Icons.image,
-                          color: Color(0xFF3B82F6),
-                          size: 24,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: item.imageUrl != null
+                              ? Image.network(
+                                  item.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: const Color(0xFF3B82F6).withOpacity(0.1),
+                                      child: const Icon(
+                                        Icons.image_not_supported_outlined,
+                                        color: Color(0xFF3B82F6),
+                                        size: 24,
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  color: const Color(0xFF3B82F6).withOpacity(0.1),
+                                  child: const Icon(
+                                    Icons.image,
+                                    color: Color(0xFF3B82F6),
+                                    size: 24,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -498,23 +518,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Qty: ${item.quantity}',
+                              'Quantity: ${item.quantity}',
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Color(0xFF64748B),
                                 fontFamily: 'Alexandria',
                               ),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatRupiah(item.totalPrice.toDouble()),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF3B82F6),
+                                fontFamily: 'Alexandria',
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      Text(
-                        _formatRupiah(item.totalPrice.toDouble()),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF7CB342),
-                          fontFamily: 'Alexandria',
+                      GestureDetector(
+                        onTap: () => _showDeleteConfirmation(context, item.id),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFEBEE),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: Color(0xFFE53E3E),
+                            size: 20,
+                          ),
                         ),
                       ),
                     ],
@@ -1472,5 +1508,132 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match match) => '${match[1]}.',
     )}';
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String itemId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 10,
+          backgroundColor: Colors.white,
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEBEE),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.delete_outline,
+                  color: Color(0xFFE53E3E),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Remove Item',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Alexandria',
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Are you sure you want to remove this item from checkout?',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Alexandria',
+              color: Color(0xFF64748B),
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Alexandria',
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.read<CartProvider>().removeFromCart(itemId);
+                _showSnackBar('Item removed from checkout');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE53E3E),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Remove',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Alexandria',
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(
+              Icons.info,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontFamily: 'Alexandria',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF64748B),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+      ),
+    );
   }
 }
