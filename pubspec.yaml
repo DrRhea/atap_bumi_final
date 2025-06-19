@@ -1,0 +1,174 @@
+name: atap_bumi_apps
+description: "A camping equipment rental Flutter app."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.0.7
+  cupertino_icons: ^1.0.8
+  
+  # HTTP & API
+  http: ^1.2.0
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
+  
+  # Navigation
+  go_router: ^13.0.0
+  
+  # UI Components
+  cached_network_image: ^3.3.1
+  image_picker: ^1.0.7
+  
+  # Date & Time
+  intl: ^0.19.0
+  
+  # Utils
+  logger: ^2.0.2+1
+  equatable: ^2.0.5
+  dio: ^5.8.0+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icon/AKSESORIS.svg
+    - assets/icon/AKTIVITAS.svg
+    - assets/icon/EMAIL.svg
+    - assets/icon/GOOGLE.svg
+    - assets/icon/HOME-1.svg
+    - assets/icon/HOME-2.svg
+    - assets/icon/KATEGORI.svg
+    - assets/icon/KERANJANG.svg
+    - assets/icon/LOGO-1.svg
+    - assets/icon/LOGO-2.svg
+    - assets/icon/LOGO-3.svg
+    - assets/icon/LOGO-4.svg
+    - assets/icon/MASAK.svg
+    - assets/icon/MESSAGE.svg
+    - assets/icon/PAKAIAN.svg
+    - assets/icon/PASSWORD.svg
+    - assets/icon/PASSWORD2.svg
+    - assets/icon/PAY-CONFIRM.svg
+    - assets/icon/PAY-RETURN.svg
+    - assets/icon/PAYMENT.svg
+    - assets/icon/PHONE.svg
+    - assets/icon/PROFILE-1.svg
+    - assets/icon/PROFILE-2.svg
+    - assets/icon/SEARCHING.svg
+    - assets/icon/TAS.svg
+    - assets/icon/TENDA.svg
+    - assets/icon/TIDUR.svg
+    - assets/images/AIR.png
+    - assets/images/ARTIKEL1.jpg
+    - assets/images/ARTIKEL2.jpg
+    - assets/images/ARTIKEL3.jpg
+    - assets/images/ARTIKEL4.jpg
+    - assets/images/BOOTS.png
+    - assets/images/BOOTS-2.png
+    - assets/images/CHAIR.png
+    - assets/images/DOUBLE.png
+    - assets/images/EIGER-BAG.png
+    - assets/images/EIGER-BAG2.png
+    - assets/images/EIGER-BOOTS.png
+    - assets/images/EIGER-HAT.png
+    - assets/images/EIGER-HAT2.png
+    - assets/images/EIGER-SHIRT.png
+    - assets/images/EIGER-TENT.png
+    - assets/images/FLYSHEET.png
+    - assets/images/FOAM.png
+    - assets/images/GAS.png
+    - assets/images/HAMMOCK.png
+    - assets/images/HAT.png
+    - assets/images/JACKET.png
+    - assets/images/JACKET2.png
+    - assets/images/LAMP.png
+    - assets/images/LARGE.png
+    - assets/images/MAPS.jpg
+    - assets/images/NESTING.png
+    - assets/images/PAKET.png
+    - assets/images/PAKET2.png
+    - assets/images/PAKET3.png
+    - assets/images/PAKET4.png
+    - assets/images/PANTS.png
+    - assets/images/SALOMON.png
+    - assets/images/SHIRT.png
+    - assets/images/SINGLE.png
+    - assets/images/SLEEPBAG.png
+    - assets/images/SLEEPBAG2.png
+    - assets/images/SMALL.png
+    - assets/images/STOVE.png
+    - assets/images/TABLE.png
+    - assets/images/TREKKING.png
+    - assets/images/UTENSIL.png
+    - assets/images/WALKIE.png
+    - assets/images/tent_article.webp
+    - assets/images/alat.png
+    - assets/images/baju.png
+    - assets/images/boots.png
+    - assets/images/celana.png
+    - assets/images/chair.png
+    - assets/images/double.png
+    - assets/images/flysheet.png
+    - assets/images/foam.png
+    - assets/images/gas.png
+    - assets/images/hammock.png
+    - assets/images/handy.png
+    - assets/images/hat.png
+    - assets/images/jacket.png
+    - assets/images/kompor.png
+    - assets/images/lamp.png
+    - assets/images/large.png
+    - assets/images/meja.png
+    - assets/images/menu1.png
+    - assets/images/menu2.png
+    - assets/images/nesting.png
+    - assets/images/selimut.png
+    - assets/images/tas-ijo.png
+    - assets/images/tenda1.png
+    - assets/images/air.png
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
