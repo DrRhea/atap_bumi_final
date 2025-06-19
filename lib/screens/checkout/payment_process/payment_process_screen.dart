@@ -13,6 +13,8 @@ import '../../../providers/rental_provider.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../models/cart.dart';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class PaymentProcessScreen extends StatefulWidget {
   final double? total;
@@ -39,16 +41,17 @@ class PaymentProcessScreen extends StatefulWidget {
 class _PaymentProcessScreenState extends State<PaymentProcessScreen> with TickerProviderStateMixin {
   late Timer _timer;
   int _secondsRemaining = 23 * 3600 + 59 * 60 + 59; // 23 hours, 59 minutes, 59 seconds
-  
+
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late AnimationController _pulseController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _pulseAnimation;
-  
+
   // Payment proof upload variables
   File? _proofOfPaymentImage;
+  Uint8List? _proofOfPaymentBytes;
   final ImagePicker _picker = ImagePicker();
   bool _isUploadingProof = false;
 
@@ -56,7 +59,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
   void initState() {
     super.initState();
     _startTimer();
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -124,7 +127,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
     if (text.contains("1234567890")) {
       message = "Bank account number copied!";
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -164,10 +167,13 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
       );
 
       if (image != null) {
-        setState(() {
-          _proofOfPaymentImage = File(image.path);
-          _isUploadingProof = false;
-        });
+      final bytes = await image.readAsBytes();
+      setState(() {
+        _proofOfPaymentImage = File(image.path);
+        _proofOfPaymentBytes = bytes;
+        _isUploadingProof = false;
+      });
+
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -200,7 +206,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
       setState(() {
         _isUploadingProof = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -209,82 +215,6 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
               const SizedBox(width: 12),
               const Text(
                 'Failed to upload image. Please try again.',
-                style: TextStyle(
-                  fontFamily: 'Alexandria',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    try {
-      setState(() {
-        _isUploadingProof = true;
-      });
-
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _proofOfPaymentImage = File(image.path);
-          _isUploadingProof = false;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                const Text(
-                  'Payment proof captured successfully!',
-                  style: TextStyle(
-                    fontFamily: 'Alexandria',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF10B981),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      } else {
-        setState(() {
-          _isUploadingProof = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isUploadingProof = false;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error, color: Colors.white),
-              const SizedBox(width: 12),
-              const Text(
-                'Failed to capture image. Please try again.',
                 style: TextStyle(
                   fontFamily: 'Alexandria',
                   fontWeight: FontWeight.w600,
@@ -348,17 +278,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                   _pickImageFromGallery();
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt, color: Color(0xFF6366F1)),
-                title: const Text(
-                  'Take Photo',
-                  style: TextStyle(fontFamily: 'Alexandria'),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImageFromCamera();
-                },
-              ),
+              
               const SizedBox(height: 10),
             ],
           ),
@@ -384,8 +304,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
       (Match match) => '${match[1]}.',
     )}';
   }
-  
-  // Helper method to convert Flutter payment method to backend format
+
   String _getBackendPaymentMethod(String paymentMethod) {
     switch (paymentMethod.toLowerCase()) {
       case 'cash on delivery':
@@ -403,7 +322,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
 
   Widget _buildPaymentMethodSection() {
     final paymentMethod = widget.paymentMethod ?? 'Transfer Bank';
-    
+
     Map<String, Map<String, dynamic>> paymentInfo = {
       "Cash On Delivery": {
         "title": "Cash Payment",
@@ -620,7 +539,6 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
             ),
           ),
           const SizedBox(height: 12),
-          
           Row(
             children: [
               Expanded(
@@ -698,9 +616,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
               ),
             ],
           ),
-          
           const SizedBox(height: 16),
-          
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -954,7 +870,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
 
   Widget _buildPaymentInstructions() {
     final paymentMethod = widget.paymentMethod ?? 'Transfer Bank';
-    
+
     switch (paymentMethod) {
       case "Cash On Delivery":
         return Column(
@@ -979,7 +895,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
             ),
           ],
         );
-      
+
       case "E-Wallet":
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -1003,7 +919,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
             ),
           ],
         );
-      
+
       case "Debit/Credit Card":
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -1027,7 +943,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
             ),
           ],
         );
-      
+
       default: // Transfer Bank
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -1169,9 +1085,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                           ),
                         ],
                       ),
-                      
                       const SizedBox(height: 20),
-                      
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
@@ -1221,7 +1135,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                                     ],
                                   ),
                                   child: Text(
-                                    widget.total != null 
+                                    widget.total != null
                                         ? _formatRupiah(widget.total!)
                                         : "Rp 0",
                                     style: const TextStyle(
@@ -1234,9 +1148,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                                 ),
                               ],
                             ),
-                            
                             const SizedBox(height: 16),
-                            
                             Container(
                               height: 1,
                               decoration: BoxDecoration(
@@ -1249,9 +1161,7 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                                 ),
                               ),
                             ),
-                            
                             const SizedBox(height: 16),
-                            
                             Row(
                               children: [
                                 Container(
@@ -1305,14 +1215,10 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 // Payment Method Card - Dynamic based on selected method
                 _buildPaymentMethodSection(),
-
                 const SizedBox(height: 20),
-
                 // Instructions Card
                 Container(
                   decoration: BoxDecoration(
@@ -1358,39 +1264,138 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                           ),
                         ],
                       ),
-                      
                       const SizedBox(height: 20),
-                      
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFFF59E0B).withOpacity(0.05),
-                              const Color(0xFFD97706).withOpacity(0.02),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFF59E0B).withOpacity(0.2),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: _buildPaymentInstructions(),
-                      ),
+                      _buildPaymentInstructions(),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 100), // Extra space for scrolling
+                const SizedBox(height: 20),
+                // Bukti pembayaran section
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7CB342).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.upload_file,
+                              color: Color(0xFF7CB342),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Upload Bukti Pembayaran',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E293B),
+                              fontFamily: 'Alexandria',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      if (_proofOfPaymentImage != null || _proofOfPaymentBytes != null)
+                        Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: kIsWeb
+                                  ? (_proofOfPaymentBytes != null
+                                      ? Image.memory(
+                                          _proofOfPaymentBytes!,
+                                          width: double.infinity,
+                                          height: 180,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : const SizedBox.shrink())
+                                  : (_proofOfPaymentImage != null
+                                      ? Image.file(
+                                          _proofOfPaymentImage!,
+                                          width: double.infinity,
+                                          height: 180,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : const SizedBox.shrink()),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _showImagePickerOptions,
+                                    icon: const Icon(Icons.edit, color: Color(0xFF7CB342)),
+                                    label: const Text(
+                                      "Ganti Bukti",
+                                      style: TextStyle(
+                                        color: Color(0xFF7CB342),
+                                        fontFamily: 'Alexandria',
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFF1F5F9),
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      else
+                        ElevatedButton.icon(
+                          onPressed: _isUploadingProof ? null : _showImagePickerOptions,
+                          icon: const Icon(Icons.upload_file, color: Color(0xFF7CB342)),
+                          label: Text(
+                            _isUploadingProof ? "Mengunggah..." : "Upload Bukti Pembayaran",
+                            style: const TextStyle(
+                              color: Color(0xFF7CB342),
+                              fontFamily: 'Alexandria',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF1F5F9),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 100),
               ],
             ),
           ),
         ),
       ),
-      // Move action buttons to bottomNavigationBar for better UX
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 34),
         decoration: BoxDecoration(
@@ -1458,228 +1463,176 @@ class _PaymentProcessScreenState extends State<PaymentProcessScreen> with Ticker
                 ),
               ),
             ),
-            
             const SizedBox(width: 16),
-            
             Expanded(
               child: Container(
                 height: 56,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: _isPaymentProofUploaded 
+                    colors: _isPaymentProofUploaded
                         ? [const Color(0xFF7CB342), const Color(0xFF8BC34A)]
                         : [Colors.grey.shade400, Colors.grey.shade500],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: _isPaymentProofUploaded ? [
-                    BoxShadow(
-                      color: const Color(0xFF7CB342).withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                      spreadRadius: 0,
-                    ),
-                  ] : [],
+                  boxShadow: _isPaymentProofUploaded
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF7CB342).withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : [],
                 ),
                 child: ElevatedButton(
-                  onPressed: !_isPaymentProofUploaded ? null : () async {
-                    try {
-                      // Get providers
-                      final cartProvider = Provider.of<CartProvider>(context, listen: false);
-                      final rentalProvider = Provider.of<RentalProvider>(context, listen: false);
-                      
-                      // Use passed cart items or fall back to provider's selected items
-                      final itemsToProcess = widget.cartItems ?? cartProvider.selectedItems;
-                      
-                      print('=== PAYMENT PROCESS DEBUG ===');
-                      print('Cart items count: ${itemsToProcess.length}');
-                      print('Total amount: ${widget.total}');
-                      print('Payment method: ${widget.paymentMethod}');
-                      
-                      if (itemsToProcess.isEmpty) {
-                        throw Exception('No cart items to process');
-                      }
-                      
-                      // Step 1: Sync cart items to backend first
-                      print('Step 1: Syncing cart items to backend...');
-                      List<int> cartItemIds = [];
-                      
-                      for (var item in itemsToProcess) {
-                        try {
-                          // Add item to backend cart
-                          final success = await cartProvider.addToCart(
-                            equipmentStockId: item.equipmentId,
-                            unitQuantity: item.quantity,
-                            plannedStartDate: DateTime.now().add(const Duration(days: 1)),
-                            plannedEndDate: DateTime.now().add(const Duration(days: 8)),
-                            notes: 'Added from checkout',
-                          );
-                          
-                          if (success) {
-                            // Get the latest cart to find the new item ID
-                            await cartProvider.getCartItems();
-                            final backendItems = cartProvider.cartItems;
-                            
-                            // Find matching item by equipment ID and quantity
-                            final matchingItem = backendItems.where((backendItem) => 
-                              backendItem.equipmentId == item.equipmentId &&
-                              backendItem.quantity == item.quantity
-                            ).firstOrNull;
-                            
-                            if (matchingItem != null) {
-                              cartItemIds.add(int.parse(matchingItem.id));
-                              print('✅ Cart item synced with ID: ${matchingItem.id}');
+                  onPressed: !_isPaymentProofUploaded
+                      ? null
+                      : () async {
+                          try {
+                            final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                            final rentalProvider = Provider.of<RentalProvider>(context, listen: false);
+
+                            final itemsToProcess = widget.cartItems ?? cartProvider.selectedItems;
+
+                            if (itemsToProcess.isEmpty) {
+                              throw Exception('No cart items to process');
+                            }
+
+                            // Step 1: Sync cart items to backend first
+                            List<int> cartItemIds = [];
+
+                            for (var item in itemsToProcess) {
+                              try {
+                                final success = await cartProvider.addToCart(
+                                  equipmentStockId: item.equipmentId,
+                                  unitQuantity: item.quantity,
+                                  plannedStartDate: DateTime.now().add(const Duration(days: 1)),
+                                  plannedEndDate: DateTime.now().add(const Duration(days: 8)),
+                                  notes: 'Added from checkout',
+                                );
+
+                                if (success) {
+                                  await cartProvider.getCartItems();
+                                  final backendItems = cartProvider.cartItems;
+
+                                  final matchingItem = backendItems.where((backendItem) =>
+                                      backendItem.equipmentId == item.equipmentId &&
+                                      backendItem.quantity == item.quantity).firstOrNull;
+
+                                  if (matchingItem != null) {
+                                    cartItemIds.add(int.parse(matchingItem.id));
+                                  }
+                                }
+                              } catch (e) {}
+                            }
+
+                            if (cartItemIds.isEmpty) {
+                              throw Exception('Failed to sync cart items to backend');
+                            }
+
+                            // Step 2: Create rental with cart item IDs
+                            final rentalData = {
+                              'shipping_address_id': 1,
+                              'rental_start_date': DateTime.now().add(const Duration(days: 1)).toIso8601String().split('T')[0],
+                              'rental_end_date': DateTime.now().add(const Duration(days: 8)).toIso8601String().split('T')[0],
+                              'shipping_method': (widget.shippingMethod ?? 'delivery').toLowerCase(),
+                              'rental_notes': widget.messageForAdmin ?? '',
+                              'cart_item_ids': cartItemIds,
+                            };
+
+                            bool rentalSuccess = false;
+                            int? rentalId;
+
+                            try {
+                              rentalSuccess = await rentalProvider.createRental(rentalData);
+
+                              if (rentalSuccess && rentalProvider.selectedRental != null) {
+                                rentalId = rentalProvider.selectedRental!.id;
+                              } else {
+                                throw Exception('Failed to create rental: ${rentalProvider.errorMessage}');
+                              }
+                            } catch (e) {
+                              throw e;
+                            }
+
+                            // Step 3: Create payment entry
+                            try {
+                              final paymentData = {
+                                'rental_id': rentalId,
+                                'payment_method': _getBackendPaymentMethod(widget.paymentMethod ?? 'Transfer Bank'),
+                              };
+
+                              final response = await http.post(
+                                Uri.parse('${ApiConstants.baseUrl}/payments'),
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Accept': 'application/json',
+                                  if (await StorageService.getAccessToken() != null)
+                                    'Authorization': 'Bearer ${await StorageService.getAccessToken()}',
+                                },
+                                body: jsonEncode(paymentData),
+                              );
+                            } catch (e) {}
+
+                            // Step 4: Save to local storage as backup
+                            try {
+                              final cartItemsData = cartProvider.selectedItems.map((item) => {
+                                    'equipment_stock_id': int.tryParse(item.equipmentId) ?? 1,
+                                    'unit_quantity': item.quantity,
+                                    'equipment_id': int.tryParse(item.equipmentId) ?? 1,
+                                    'equipment_name': item.equipmentName,
+                                    'price_per_day': item.pricePerDay,
+                                    'image_url': item.imageUrl,
+                                  }).toList();
+
+                              await RentalService.saveRental(
+                                totalAmount: widget.total ?? 0,
+                                paymentMethod: widget.paymentMethod ?? 'Transfer Bank',
+                                shippingMethod: widget.shippingMethod ?? 'Delivery',
+                                deliveryOption: widget.deliveryOption,
+                                messageForAdmin: widget.messageForAdmin,
+                                cartItems: cartItemsData,
+                              );
+                            } catch (e) {}
+
+                            if (rentalSuccess && context.mounted) {
+                              await cartProvider.clearCart();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Rental created successfully! Rental ID: $rentalId'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const PaymentConfirmationScreen(),
+                                ),
+                              );
+                            } else if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to process payment: ${rentalProvider.errorMessage ?? "Unknown error"}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error processing payment: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
                             }
                           }
-                        } catch (e) {
-                          print('❌ Failed to sync cart item: $e');
-                        }
-                      }
-                      
-                      if (cartItemIds.isEmpty) {
-                        throw Exception('Failed to sync cart items to backend');
-                      }
-                      
-                      print('✅ Step 1 completed. Cart item IDs: $cartItemIds');
-                      
-                      // Step 2: Create rental with cart item IDs
-                      print('Step 2: Creating rental...');
-                      final rentalData = {
-                        'shipping_address_id': 1, // Default address ID
-                        'rental_start_date': DateTime.now().add(const Duration(days: 1)).toIso8601String().split('T')[0],
-                        'rental_end_date': DateTime.now().add(const Duration(days: 8)).toIso8601String().split('T')[0],
-                        'shipping_method': (widget.shippingMethod ?? 'delivery').toLowerCase(),
-                        'rental_notes': widget.messageForAdmin ?? '',
-                        'cart_item_ids': cartItemIds,
-                      };
-                      
-                      print('Rental data: ${jsonEncode(rentalData)}');
-                      
-                      bool rentalSuccess = false;
-                      int? rentalId;
-                      
-                      try {
-                        rentalSuccess = await rentalProvider.createRental(rentalData);
-                        
-                        if (rentalSuccess && rentalProvider.selectedRental != null) {
-                          rentalId = rentalProvider.selectedRental!.id;
-                          print('✅ Step 2 completed. Rental created with ID: $rentalId');
-                        } else {
-                          throw Exception('Failed to create rental: ${rentalProvider.errorMessage}');
-                        }
-                      } catch (e) {
-                        print('❌ Rental creation failed: $e');
-                        throw e;
-                      }
-                      
-                      // Step 3: Create payment entry
-                      print('Step 3: Creating payment...');
-                      try {
-                        final paymentData = {
-                          'rental_id': rentalId,
-                          'payment_method': _getBackendPaymentMethod(widget.paymentMethod ?? 'Transfer Bank'),
-                        };
-                        
-                        print('Payment data: ${jsonEncode(paymentData)}');
-                        
-                        // Create payment via API call
-                        final response = await http.post(
-                          Uri.parse('${ApiConstants.baseUrl}/payments'),
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            if (await StorageService.getAccessToken() != null) 
-                              'Authorization': 'Bearer ${await StorageService.getAccessToken()}',
-                          },
-                          body: jsonEncode(paymentData),
-                        );
-                        
-                        print('Payment response status: ${response.statusCode}');
-                        print('Payment response body: ${response.body}');
-                        
-                        if (response.statusCode == 200 || response.statusCode == 201) {
-                          print('✅ Step 3 completed. Payment created successfully');
-                        } else {
-                          print('⚠️ Payment creation failed but rental exists');
-                        }
-                      } catch (e) {
-                        print('⚠️ Payment creation error: $e');
-                        // Don't fail the whole process if payment creation fails
-                      }
-                      
-                      // Step 4: Save to local storage as backup
-                      print('Step 4: Saving to local storage...');
-                      try {
-                        final cartItemsData = cartProvider.selectedItems.map((item) => {
-                          'equipment_stock_id': int.tryParse(item.equipmentId) ?? 1,
-                          'unit_quantity': item.quantity,
-                          'equipment_id': int.tryParse(item.equipmentId) ?? 1,
-                          'equipment_name': item.equipmentName,
-                          'price_per_day': item.pricePerDay,
-                          'image_url': item.imageUrl,
-                        }).toList();
-                        
-                        await RentalService.saveRental(
-                          totalAmount: widget.total ?? 0,
-                          paymentMethod: widget.paymentMethod ?? 'Transfer Bank',
-                          shippingMethod: widget.shippingMethod ?? 'Delivery',
-                          deliveryOption: widget.deliveryOption,
-                          messageForAdmin: widget.messageForAdmin,
-                          cartItems: cartItemsData,
-                        );
-                        print('✅ Step 4 completed. Local backup saved');
-                      } catch (e) {
-                        print('⚠️ Local storage error: $e');
-                      }
-                      
-                      if (rentalSuccess && context.mounted) {
-                        // Clear the local cart after successful rental creation
-                        await cartProvider.clearCart();
-                        
-                        // Show success message
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Rental created successfully! Rental ID: $rentalId'
-                            ),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                        
-                        // Navigate to confirmation screen
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PaymentConfirmationScreen(),
-                          ),
-                        );
-                      } else if (context.mounted) {
-                        // Show error message
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Failed to process payment: ${rentalProvider.errorMessage ?? "Unknown error"}'
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      print('=== PAYMENT ERROR DEBUG ===');
-                      print('Error: $e');
-                      print('Stack trace: ${StackTrace.current}');
-                      
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error processing payment: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
@@ -1779,42 +1732,6 @@ class ModernInstructionStep extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-class InstructionStep extends StatelessWidget {
-  final int number;
-  final String text;
-
-  const InstructionStep({Key? key, required this.number, required this.text})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: const BoxDecoration(
-            color: Color(0xFF505050),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              number.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
       ],
     );
   }
