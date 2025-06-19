@@ -233,7 +233,7 @@ class AuthService {
         };
       }
       
-      final response = await http.put(
+      final response = await http.post(
         Uri.parse('${ApiConstants.baseUrl}${ApiConstants.profile}'),
         headers: {
           ...ApiConstants.defaultHeaders,

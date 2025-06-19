@@ -96,10 +96,28 @@ class _SignInScreenState extends State<SignInScreen> with TickerProviderStateMix
 
     if (success) {
       _showSnackBar('Welcome back!', true);
-      // Navigate to home or dashboard
+      
+      // Role-based navigation
+      String targetRoute;
+      if (authProvider.user?.isAdmin == true) {
+        targetRoute = AppRoutes.adminDashboard;
+      } else {
+        targetRoute = AppRoutes.home;
+      }
+      
+      // Use redirect URL from backend if provided, otherwise use role-based default
+      final redirectUrl = authProvider.redirectUrl;
+      if (redirectUrl != null && redirectUrl.isNotEmpty) {
+        if (redirectUrl.contains('/admin')) {
+          targetRoute = AppRoutes.adminDashboard;
+        } else {
+          targetRoute = AppRoutes.home;
+        }
+      }
+      
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.home,
+        targetRoute,
         (route) => false,
       );
     } else {

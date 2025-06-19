@@ -49,6 +49,12 @@ import '../screens/profile/change_password/change_password_screen.dart';
 import '../screens/profile/edit_profile/edit_profile_screen.dart';
 import '../screens/profile/profile_screen.dart';
 
+// Admin Screens
+import '../screens/admin/dashboard/admin_dashboard_screen.dart';
+import '../screens/admin/chat/admin_chat_screen.dart';
+import '../screens/admin/transactions/admin_transactions_screen.dart';
+import '../screens/admin/reports/admin_reports_screen.dart';
+
 class AppRoutes {
   // List Of Page
   static const String pageList = '/';
@@ -102,6 +108,12 @@ class AppRoutes {
   static const String changePassword = '/change-password';
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
+
+  // Admin Routes
+  static const String adminDashboard = '/admin/dashboard';
+  static const String adminChat = '/admin/chat';
+  static const String adminTransactions = '/admin/transactions';
+  static const String adminReports = '/admin/reports';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -215,6 +227,16 @@ class AppRoutes {
         return MaterialPageRoute(builder: (context) => const ProfileScreen());
       case editProfile:
         return MaterialPageRoute(builder: (context) => const EditProfileScreen());
+
+      // Admin Routes
+      case adminDashboard:
+        return MaterialPageRoute(builder: (context) => const AdminDashboardScreen());
+      case adminChat:
+        return MaterialPageRoute(builder: (context) => const AdminChatScreen());
+      case adminTransactions:
+        return MaterialPageRoute(builder: (context) => const AdminTransactionsScreen());
+      case adminReports:
+        return MaterialPageRoute(builder: (context) => const AdminReportsScreen());
 
       default:
         return MaterialPageRoute(
