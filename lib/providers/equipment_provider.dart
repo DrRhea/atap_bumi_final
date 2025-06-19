@@ -70,24 +70,110 @@ class EquipmentProvider extends ChangeNotifier {
       final response = await http.get(uri, headers: await _getHeaders());
       final data = jsonDecode(response.body);
 
-      if (data['success']) {
-        final responseData = data['data'];
-        final List<Equipment> newEquipments =
-            (responseData['data'] as List)
-                .map((json) => Equipment.fromJson(json))
-                .toList();
+      // Debug print untuk melihat respons dari API
+      print('API Response Status: ${response.statusCode}');
+      print(
+        'API Response Body (first 500 chars): ${response.body.length > 500 ? response.body.substring(0, 500) + "..." : response.body}',
+      );
+      if (response.statusCode == 200) {
+        if (data['success']) {
+          final responseData = data['data'];
 
-        if (refresh) {
-          _equipments = newEquipments;
+          // Debug respons data structure
+          print('Response data keys: ${responseData.keys}');
+          print('Data array type: ${responseData['data'].runtimeType}');
+          print('Data array length: ${responseData['data'].length}');
+          final List<Equipment> allEquipments =
+              (responseData['data'] as List)
+                  .map((json) => Equipment.fromJson(json))
+                  .toList(); // Apply manual price filter since backend doesn't seem to handle it properly
+          List<Equipment> filteredEquipments = allEquipments;
+          if (minPrice != null || maxPrice != null) {
+            final double filterMinPrice = minPrice ?? 0;
+            final double filterMaxPrice = maxPrice ?? double.infinity;
+
+            filteredEquipments =
+                allEquipments.where((equipment) {
+                  final price = equipment.rentalPricePerDay;
+                  return price >= filterMinPrice && price <= filterMaxPrice;
+                }).toList();
+            print('Manual filter applied:');
+            print('- Original count: ${allEquipments.length}');
+            print('- Filtered count: ${filteredEquipments.length}');
+            print('- Price range: $filterMinPrice - $filterMaxPrice');
+          } // Apply manual sorting since backend doesn't handle it properly
+          if (sortBy != null && filteredEquipments.isNotEmpty) {
+            print('Applying manual sorting: $sortBy');
+
+            switch (sortBy) {
+              case 'price_asc':
+                filteredEquipments.sort(
+                  (a, b) => a.rentalPricePerDay.compareTo(b.rentalPricePerDay),
+                );
+                print('Applied price_asc sorting');
+                break;
+              case 'price_desc':
+                filteredEquipments.sort(
+                  (a, b) => b.rentalPricePerDay.compareTo(a.rentalPricePerDay),
+                );
+                print('Applied price_desc sorting');
+                break;
+              case 'name':
+                filteredEquipments.sort(
+                  (a, b) => a.equipmentName.toLowerCase().compareTo(
+                    b.equipmentName.toLowerCase(),
+                  ),
+                );
+                print('Applied name sorting');
+                break;
+              case 'rating':
+                filteredEquipments.sort((a, b) {
+                  final aRating = a.averageRating ?? 0.0;
+                  final bRating = b.averageRating ?? 0.0;
+                  return bRating.compareTo(aRating);
+                });
+                print('Applied rating sorting');
+                break;
+            }
+
+            print(
+              'After sorting - prices: ${filteredEquipments.map((e) => e.rentalPricePerDay).take(5).join(', ')}',
+            );
+          }
+
+          // Debug print untuk melihat produk yang dikembalikan
+          print('Number of equipment returned: ${filteredEquipments.length}');
+          if (filteredEquipments.isNotEmpty) {
+            print('Sample equipment after sorting ($sortBy):');
+            for (
+              int i = 0;
+              i <
+                  (filteredEquipments.length > 5
+                      ? 5
+                      : filteredEquipments.length);
+              i++
+            ) {
+              print(
+                '- ${filteredEquipments[i].equipmentName}: Rp ${filteredEquipments[i].rentalPricePerDay}',
+              );
+            }
+          }
+
+          if (refresh) {
+            _equipments = filteredEquipments;
+          } else {
+            _equipments.addAll(filteredEquipments);
+          }
+
+          _currentPage++;
+          _hasMoreData =
+              responseData['current_page'] < responseData['last_page'];
+          _clearError();
         } else {
-          _equipments.addAll(newEquipments);
+          _setError(data['message']);
         }
-
-        _currentPage++;
-        _hasMoreData = responseData['current_page'] < responseData['last_page'];
-        _clearError();
       } else {
-        _setError(data['message']);
+        _setError('Failed to load equipment: ${response.statusCode}');
       }
     } catch (e) {
       _setError('Failed to load equipment: $e');
