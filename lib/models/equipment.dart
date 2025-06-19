@@ -84,16 +84,20 @@ class Equipment {
             : null,
     totalStock: json['total_stock'],
   );
+  String get primaryPhotoUrl {
+    if (photos == null || photos!.isEmpty) return '';
 
-  String get primaryPhotoUrl =>
-      photos
-          ?.firstWhere(
-            (p) => p.isPrimary,
-            orElse: () => photos?.first ?? EquipmentPhoto.empty(),
-          )
-          .photoUrl ??
-      '';
-  
+    try {
+      final primaryPhoto = photos!.firstWhere(
+        (p) => p.isPrimary,
+        orElse: () => photos!.first,
+      );
+      return primaryPhoto.photoUrl;
+    } catch (e) {
+      return '';
+    }
+  }
+
   bool get isAvailable {
     if (stock != null && stock!.isNotEmpty) {
       return stock!.any((s) => s.isAvailable);
