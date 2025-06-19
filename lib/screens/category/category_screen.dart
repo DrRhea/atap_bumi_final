@@ -207,15 +207,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(
-              Icons.tune, 
-              color: Color(0xFF64748B),
-            ),
-            onPressed: () {
-              // TODO: Implement filter functionality
-            },
-          ),
+          
         ],
       ),
     );
