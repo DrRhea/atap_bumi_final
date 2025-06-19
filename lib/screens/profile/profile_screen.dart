@@ -233,8 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                         child: Column(
                           children: [
                             const SizedBox(height: 20),
-                            
-                            // Page Title
+                              // Page Title
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 24),
                               child: Row(
@@ -246,23 +245,6 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                                       fontWeight: FontWeight.w800,
                                       color: Colors.white,
                                       fontFamily: 'Alexandria',
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: IconButton(
-                                      onPressed: () {
-                                        // Navigate to settings
-                                      },
-                                      icon: const Icon(
-                                        Icons.settings_outlined,
-                                        color: Colors.white,
-                                        size: 24,
-                                      ),
                                     ),
                                   ),
                                 ],
