@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_routes.dart';
+import '../../core/services/chat_service.dart';
 
 class InboxScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -17,6 +18,12 @@ class _InboxScreenState extends State<InboxScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _messageController = TextEditingController();
+  
+  List<Map<String, dynamic>> chats = [];
+  Map<String, dynamic>? selectedChat;
+  List<Map<String, dynamic>> messages = [];
+  bool isLoading = true;
+  bool isSending = false;
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -61,6 +68,99 @@ class _InboxScreenState extends State<InboxScreen>
 
     _fadeController.forward();
     _slideController.forward();
+    
+    // Load chats
+    _loadChats();
+  }
+
+  Future<void> _loadChats() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      print('Loading chats...'); // Debug log
+      final response = await ChatService.getChats();
+      print('Chat response: $response'); // Debug log
+      
+      if (response['success'] == true) {
+        final data = response['data'];
+        List<Map<String, dynamic>> chatList = [];
+        
+        // Handle different response structures
+        if (data is Map && data.containsKey('data')) {
+          // If response has nested 'data' key
+          chatList = List<Map<String, dynamic>>.from(data['data'] ?? []);
+        } else if (data is List) {
+          // If response 'data' is directly a list
+          chatList = List<Map<String, dynamic>>.from(data);
+        } else if (data is Map && data.containsKey('chats')) {
+          // If response has 'chats' key
+          chatList = List<Map<String, dynamic>>.from(data['chats'] ?? []);
+        }
+        
+        print('Parsed chats: $chatList'); // Debug log
+        
+        setState(() {
+          chats = chatList;
+          isLoading = false;
+        });
+      } else {
+        print('Failed to load chats: ${response['message']}'); // Debug log
+        setState(() {
+          isLoading = false;
+        });
+        
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response['message'] ?? 'Failed to load chats')),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error loading chats: $e'); // Debug log
+      setState(() {
+        isLoading = false;
+      });
+      
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading chats: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadChatMessages(int chatId) async {
+    try {
+      print('Loading messages for chat $chatId...'); // Debug log
+      final response = await ChatService.getChatMessages(chatId);
+      print('Messages response: $response'); // Debug log
+      
+      if (response['success'] == true) {
+        final data = response['data'];
+        List<Map<String, dynamic>> messageList = [];
+        
+        // Handle different response structures
+        if (data is Map && data.containsKey('messages')) {
+          messageList = List<Map<String, dynamic>>.from(data['messages'] ?? []);
+        } else if (data is List) {
+          messageList = List<Map<String, dynamic>>.from(data);
+        }
+        
+        print('Parsed messages: $messageList'); // Debug log
+        
+        setState(() {
+          messages = messageList;
+        });
+      } else {
+        print('Failed to load messages: ${response['message']}'); // Debug log
+      }
+    } catch (e) {
+      print('Error loading messages: $e'); // Debug log
+    }
   }
 
   @override
@@ -70,14 +170,6 @@ class _InboxScreenState extends State<InboxScreen>
     _fadeController.dispose();
     _slideController.dispose();
     super.dispose();
-  }
-
-  void _sendMessage() {
-    if (_messageController.text.trim().isNotEmpty) {
-      // TODO: Implement send message logic
-      print('Sending message: ${_messageController.text}');
-      _messageController.clear();
-    }
   }
 
   @override
@@ -237,44 +329,310 @@ class _InboxScreenState extends State<InboxScreen>
   }
 
   Widget _buildChatTab() {
+    if (selectedChat == null) {
+      return _buildChatList();
+    } else {
+      return _buildChatDetail();
+    }
+  }
+
+  Widget _buildChatList() {
+    if (isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading chats...'),
+          ],
+        ),
+      );
+    }
+
+    if (chats.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.chat_bubble_outline,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No chats yet',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Start a conversation with support',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _showNewChatDialog,
+              icon: const Icon(Icons.add),
+              label: const Text('New Chat'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Add refresh button
+            TextButton.icon(
+              onPressed: _loadChats,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       children: [
-        // Chat messages area
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+        // Add new chat button and refresh button
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
             children: [
-              _buildChatMessage(
-                message: "Hello! How can I help you today?",
-                isFromSupport: true,
-                time: "10:30 AM",
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _showNewChatDialog,
+                  icon: const Icon(Icons.add),
+                  label: const Text('New Chat'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6366F1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
-              _buildChatMessage(
-                message: "Hi! I have a question about my rental booking.",
-                isFromSupport: false,
-                time: "10:32 AM",
-              ),
-              _buildChatMessage(
-                message: "Of course! I'd be happy to help. Could you please provide your booking ID?",
-                isFromSupport: true,
-                time: "10:33 AM",
-              ),
-              _buildChatMessage(
-                message: "Sure, it's #RNT-2024-001234",
-                isFromSupport: false,
-                time: "10:35 AM",
-              ),
-              _buildChatMessage(
-                message: "Perfect! I can see your booking for the camping tent. What would you like to know?",
-                isFromSupport: true,
-                time: "10:36 AM",
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: _loadChats,
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Refresh',
               ),
             ],
           ),
         ),
+        
+        // Chat list
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadChats,
+            child: ListView.builder(
+              itemCount: chats.length,
+              itemBuilder: (context, index) {
+                final chat = chats[index];
+                return _buildChatItem(chat);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChatItem(Map<String, dynamic> chat) {
+    final latestMessage = chat['messages']?.isNotEmpty == true ? chat['messages'][0] : null;
+    final status = chat['status'] ?? 'open';
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFF6366F1),
+          child: Text(
+            (chat['subject'] ?? 'S').toString().substring(0, 1).toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        title: Text(
+          chat['subject'] ?? 'Support Chat',
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (latestMessage != null)
+              Text(
+                latestMessage['message'] ?? '',
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 14,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            const SizedBox(height: 4),
+            Text(
+              _getStatusText(status),
+              style: TextStyle(
+                color: _getStatusColor(status),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              _formatDate(chat['created_at']),
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: _getStatusColor(status).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                status.toUpperCase(),
+                style: TextStyle(
+                  color: _getStatusColor(status),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        onTap: () => _openChatDetail(chat),
+      ),
+    );
+  }
+
+  Widget _buildChatDetail() {
+    return Column(
+      children: [
+        // Chat header
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    selectedChat = null;
+                    messages.clear();
+                  });
+                },
+                icon: const Icon(Icons.arrow_back),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      selectedChat!['subject'] ?? 'Support Chat',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      _getStatusText(selectedChat!['status']),
+                      style: TextStyle(
+                        color: _getStatusColor(selectedChat!['status']),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Messages area
+        Expanded(
+          child: messages.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No messages yet',
+                    style: TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 16,
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    return _buildChatMessage(
+                      message: message['message'] ?? '',
+                      isFromSupport: message['is_admin_reply'] == true,
+                      time: _formatMessageTime(message['created_at']),
+                    );
+                  },
+                ),
+        ),
 
         // Message input area
-        Container(
+        _buildMessageInput(),
+      ],
+    );
+  }
+
+  Widget _buildMessageInput() {
+    return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -354,9 +712,7 @@ class _InboxScreenState extends State<InboxScreen>
               ),
             ],
           ),
-        ),
-      ],
-    );
+        );
   }
 
   Widget _buildChatMessage({
@@ -375,7 +731,7 @@ class _InboxScreenState extends State<InboxScreen>
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: const Color(0xFF7CB342),
+                color: const Color(0xFF10B981),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(
@@ -386,53 +742,49 @@ class _InboxScreenState extends State<InboxScreen>
             ),
             const SizedBox(width: 12),
           ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: isFromSupport
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isFromSupport
-                        ? const Color(0xFFF8FAFC)
-                        : const Color(0xFF7CB342),
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(isFromSupport ? 4 : 16),
-                      bottomRight: Radius.circular(isFromSupport ? 16 : 4),
-                    ),
-                    border: isFromSupport
-                        ? Border.all(
-                            color: const Color(0xFFE2E8F0),
-                            width: 1,
-                          )
-                        : null,
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isFromSupport
+                    ? Colors.white
+                    : const Color(0xFF6366F1),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isFromSupport ? 4 : 16),
+                  bottomRight: Radius.circular(isFromSupport ? 16 : 4),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 1),
                   ),
-                  child: Text(
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     message,
                     style: TextStyle(
-                      color: isFromSupport
-                          ? const Color(0xFF1E293B)
-                          : Colors.white,
                       fontSize: 14,
+                      color: isFromSupport ? const Color(0xFF1E293B) : Colors.white,
                       fontFamily: 'Alexandria',
-                      height: 1.4,
                     ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  time,
-                  style: const TextStyle(
-                    color: Color(0xFF94A3B8),
-                    fontSize: 12,
-                    fontFamily: 'Alexandria',
+                  const SizedBox(height: 4),
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isFromSupport ? const Color(0xFF94A3B8) : Colors.white70,
+                      fontFamily: 'Alexandria',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           if (!isFromSupport) ...[
@@ -624,5 +976,178 @@ class _InboxScreenState extends State<InboxScreen>
         ],
       ),
     );
+  }
+
+  String _getStatusText(String? status) {
+    switch (status) {
+      case 'open':
+        return 'Open - Waiting for response';
+      case 'closed':
+        return 'Closed';
+      case 'in_progress':
+        return 'In Progress';
+      default:
+        return 'Open';
+    }
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case 'open':
+        return Colors.green;
+      case 'closed':
+        return Colors.grey;
+      case 'in_progress':
+        return Colors.orange;
+      default:
+        return Colors.green;
+    }
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return '';
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+      
+      if (difference.inDays > 0) {
+        return '${difference.inDays}d ago';
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes}m ago';
+      } else {
+        return 'Just now';
+      }
+    } catch (e) {
+      return '';
+    }
+  }
+
+  String _formatMessageTime(String? dateString) {
+    if (dateString == null) return '';
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  void _openChatDetail(Map<String, dynamic> chat) {
+    setState(() {
+      selectedChat = chat;
+    });
+    _loadChatMessages(chat['id']);
+  }
+
+  void _showNewChatDialog() {
+    final subjectController = TextEditingController();
+    final messageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('New Chat'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: subjectController,
+              decoration: const InputDecoration(
+                labelText: 'Subject',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: messageController,
+              decoration: const InputDecoration(
+                labelText: 'Message',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (subjectController.text.isNotEmpty &&
+                  messageController.text.isNotEmpty) {
+                Navigator.pop(context);
+                await _createNewChat(
+                  subjectController.text,
+                  messageController.text,
+                );
+              }
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _createNewChat(String subject, String message) async {
+    try {
+      final response = await ChatService.createChat(
+        subject: subject,
+        message: message,
+      );
+      if (response['success'] == true) {
+        _loadChats(); // Refresh chat list
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Chat created successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Failed to create chat')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating chat: $e')),
+      );
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    if (_messageController.text.trim().isEmpty || selectedChat == null || isSending) {
+      return;
+    }
+
+    setState(() {
+      isSending = true;
+    });
+
+    try {
+      final response = await ChatService.sendMessage(
+        selectedChat!['id'],
+        _messageController.text.trim(),
+      );
+
+      if (response['success'] == true) {
+        _messageController.clear();
+        _loadChatMessages(selectedChat!['id']); // Refresh messages
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Failed to send message')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending message: $e')),
+      );
+    } finally {
+      setState(() {
+        isSending = false;
+      });
+    }
   }
 }

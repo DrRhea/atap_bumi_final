@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/chat_service.dart';
 import '../notification/notification_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -10,18 +11,146 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  List<dynamic> chats = [];
+  List<dynamic> messages = [];
+  int? currentChatId;
+  bool isLoading = true;
+  bool isSending = false;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChats();
+  }
 
   @override
   void dispose() {
     _messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isNotEmpty) {
-      // TODO: Implement send message logic
-      print('Sending message: ${_messageController.text}');
-      _messageController.clear();
+  Future<void> _loadChats() async {
+    try {
+      setState(() => isLoading = true);
+      
+      final response = await ChatService.getChats();
+      
+      if (response['success'] == true) {
+        final chatList = response['data'] as List;
+        setState(() {
+          chats = chatList;
+          isLoading = false;
+        });
+        
+        if (chatList.isEmpty) {
+          await _createInitialChat();
+        } else {
+          currentChatId = chatList.first['id'];
+          await _loadMessages(currentChatId!);
+        }
+      } else {
+        await _createInitialChat();
+      }
+    } catch (e) {
+      setState(() => isLoading = false);
+      _showError('Error loading chats: $e');
+    }
+  }
+
+  Future<void> _createInitialChat() async {
+    try {
+      final response = await ChatService.createChat(
+        subject: 'Customer Support',
+        message: 'Hello! I need help with my rental.',
+      );
+      
+      if (response['success'] == true) {
+        final chat = response['data'];
+        setState(() {
+          currentChatId = chat['id'];
+          chats = [chat];
+          messages = chat['messages'] ?? [];
+          isLoading = false;
+        });
+        _scrollToBottom();
+      } else {
+        setState(() => isLoading = false);
+        _showError(response['message'] ?? 'Failed to create chat');
+      }
+    } catch (e) {
+      setState(() => isLoading = false);
+      _showError('Error creating chat: $e');
+    }
+  }
+
+  Future<void> _loadMessages(int chatId) async {
+    try {
+      final response = await ChatService.getChatMessages(chatId);
+      
+      if (response['success'] == true) {
+        setState(() {
+          messages = response['data']['messages'] ?? [];
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      _showError('Error loading messages: $e');
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    if (_messageController.text.trim().isEmpty || isSending || currentChatId == null) return;
+
+    final messageText = _messageController.text.trim();
+    _messageController.clear();
+
+    try {
+      setState(() => isSending = true);
+
+      final response = await ChatService.sendMessage(currentChatId!, messageText);
+      
+      if (response['success'] == true) {
+        await _loadMessages(currentChatId!);
+      } else {
+        _showError(response['message'] ?? 'Failed to send message');
+        _messageController.text = messageText;
+      }
+    } catch (e) {
+      _showError('Error sending message: $e');
+      _messageController.text = messageText;
+    } finally {
+      setState(() => isSending = false);
+    }
+  }
+
+  void _showError(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  String _formatTime(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return '';
     }
   }
 
