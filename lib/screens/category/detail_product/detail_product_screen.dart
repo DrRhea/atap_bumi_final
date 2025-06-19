@@ -978,7 +978,7 @@ class DetailProductScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Duration: ${endDate.difference(startDate).inDays + 1} days',
+                              'Duration: ${endDate.difference(startDate).inDays} days',
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -1092,7 +1092,7 @@ class DetailProductScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Days: ${endDate.difference(startDate).inDays + 1}',
+                                  'Days: ${endDate.difference(startDate).inDays}',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Color(0xFF64748B),
@@ -1115,7 +1115,7 @@ class DetailProductScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Rp ${_formatPrice(equipment.rentalPricePerDay * quantity * (endDate.difference(startDate).inDays + 1))}',
+                                  'Rp ${_formatPrice(equipment.rentalPricePerDay * quantity * (endDate.difference(startDate).inDays))}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -1605,7 +1605,7 @@ class DetailProductScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Duration: ${endDate.difference(startDate).inDays + 1} days',
+                              'Duration: ${endDate.difference(startDate).inDays} days',
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -1719,7 +1719,7 @@ class DetailProductScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Days: ${endDate.difference(startDate).inDays + 1}',
+                                  'Days: ${endDate.difference(startDate).inDays}',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Color(0xFF64748B),
@@ -1742,7 +1742,7 @@ class DetailProductScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Rp ${_formatPrice(equipment.rentalPricePerDay * quantity * (endDate.difference(startDate).inDays + 1))}',
+                                  'Rp ${_formatPrice(equipment.rentalPricePerDay * quantity * (endDate.difference(startDate).inDays))}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
