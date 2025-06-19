@@ -179,9 +179,8 @@ class DateFormatter {
     return age;
   }
 
-  // Get rental duration
-  static String getRentalDuration(DateTime startDate, DateTime endDate) {
-    final difference = endDate.difference(startDate).inDays + 1;
+  // Get rental duration  static String getRentalDuration(DateTime startDate, DateTime endDate) {
+    final difference = endDate.difference(startDate).inDays;
 
     if (difference == 1) {
       return '1 hari';
