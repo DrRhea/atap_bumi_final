@@ -33,6 +33,8 @@ class EquipmentProvider extends ChangeNotifier {
     int? subCategoryId,
     String? search,
     String? sortBy,
+    double? minPrice,
+    double? maxPrice,
     bool refresh = false,
   }) async {
     if (refresh) {
@@ -49,17 +51,21 @@ class EquipmentProvider extends ChangeNotifier {
         'page': _currentPage.toString(),
         'per_page': '10',
       };
-
       if (categoryId != null)
         queryParams['category_id'] = categoryId.toString();
       if (subCategoryId != null)
         queryParams['sub_category_id'] = subCategoryId.toString();
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
       if (sortBy != null) queryParams['sort_by'] = sortBy;
-
+      if (minPrice != null) queryParams['min_price'] = minPrice.toString();
+      if (maxPrice != null) queryParams['max_price'] = maxPrice.toString();
       final uri = Uri.parse(
         '${ApiConstants.baseUrl}${ApiConstants.equipment}',
       ).replace(queryParameters: queryParams);
+
+      // Debug print untuk melihat URL dan parameter yang dikirim
+      print('API Request URL: $uri');
+      print('Query Parameters: $queryParams');
 
       final response = await http.get(uri, headers: await _getHeaders());
       final data = jsonDecode(response.body);
@@ -150,7 +156,7 @@ class EquipmentProvider extends ChangeNotifier {
       print('URL: $uri');
 
       final response = await http.get(uri, headers: await _getHeaders());
-      
+
       print('Response Status: ${response.statusCode}');
       print('Response Body: ${response.body}');
 
@@ -158,24 +164,26 @@ class EquipmentProvider extends ChangeNotifier {
 
       if (data['success']) {
         final responseData = data['data'];
-        final equipmentList = responseData is Map && responseData.containsKey('data') 
-            ? responseData['data'] 
-            : responseData;
+        final equipmentList =
+            responseData is Map && responseData.containsKey('data')
+                ? responseData['data']
+                : responseData;
 
-        _equipments = (equipmentList as List)
-            .map((json) {
-              try {
-                return Equipment.fromJson(json);
-              } catch (e) {
-                print('Error parsing equipment: $e');
-                print('JSON: $json');
-                return null;
-              }
-            })
-            .where((equipment) => equipment != null)
-            .cast<Equipment>()
-            .toList();
-        
+        _equipments =
+            (equipmentList as List)
+                .map((json) {
+                  try {
+                    return Equipment.fromJson(json);
+                  } catch (e) {
+                    print('Error parsing equipment: $e');
+                    print('JSON: $json');
+                    return null;
+                  }
+                })
+                .where((equipment) => equipment != null)
+                .cast<Equipment>()
+                .toList();
+
         print('Loaded ${_equipments.length} equipments');
         _clearError();
       } else {
