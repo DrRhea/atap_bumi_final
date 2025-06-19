@@ -10,14 +10,15 @@ class CheckoutScreen extends StatefulWidget {
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
-class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStateMixin {
+class _CheckoutScreenState extends State<CheckoutScreen>
+    with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late AnimationController _pulseController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _pulseAnimation;
-  
+
   String _deliveryOption = 'Reguler (Tomorrow Arrive)';
   String _shippingMethod = 'Delivery';
   String _messageForAdmin = '';
@@ -26,7 +27,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -40,29 +41,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
 
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     _fadeController.forward();
     _slideController.forward();
@@ -91,10 +83,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFFE2E8F0),
-              width: 1.5,
-            ),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -274,8 +263,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader(
-            _shippingMethod == 'Pickup' ? 'Pickup Address' : 'Delivery Address', 
-            Icons.location_on
+            _shippingMethod == 'Pickup' ? 'Pickup Address' : 'Delivery Address',
+            Icons.location_on,
           ),
           Container(
             padding: const EdgeInsets.all(16),
@@ -309,63 +298,60 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.home,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: const Icon(Icons.home, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _shippingMethod == 'Pickup' 
-                      ? const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Atap Bumi Camping Store',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E293B),
-                                fontFamily: 'Alexandria',
+                  child:
+                      _shippingMethod == 'Pickup'
+                          ? const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Atap Bumi Camping Store',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF1E293B),
+                                  fontFamily: 'Alexandria',
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Jl. Raya Camping No. 123\nKota Adventure, 12345\nTel: +62 812-3456-7890',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF64748B),
-                                fontFamily: 'Alexandria',
-                                height: 1.4,
+                              SizedBox(height: 4),
+                              Text(
+                                'Jl. Raya Camping No. 123\nKota Adventure, 12345\nTel: +62 812-3456-7890',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF64748B),
+                                  fontFamily: 'Alexandria',
+                                  height: 1.4,
+                                ),
                               ),
-                            ),
-                          ],
-                        )
-                      : const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'John Doe',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E293B),
-                                fontFamily: 'Alexandria',
+                            ],
+                          )
+                          : const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'John Doe',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF1E293B),
+                                  fontFamily: 'Alexandria',
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Jl. Sudirman No. 123, Blok A\nJakarta Pusat, DKI Jakarta 10220\nTel: +62 812-9876-5432',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF64748B),
-                                fontFamily: 'Alexandria',
-                                height: 1.4,
+                              SizedBox(height: 4),
+                              Text(
+                                'Jl. Sudirman No. 123, Blok A\nJakarta Pusat, DKI Jakarta 10220\nTel: +62 812-9876-5432',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF64748B),
+                                  fontFamily: 'Alexandria',
+                                  height: 1.4,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -395,7 +381,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
     return Consumer<CartProvider>(
       builder: (context, cartProvider, child) {
         final cartItems = cartProvider.cartItems;
-        
+
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -413,8 +399,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader('Order Items', Icons.shopping_bag, color: const Color(0xFF3B82F6)),
-              
+              _buildSectionHeader(
+                'Order Items',
+                Icons.shopping_bag,
+                color: const Color(0xFF3B82F6),
+              ),
+
               if (cartItems.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -449,113 +439,129 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                   ),
                 )
               else
-                ...cartItems.map((item) => Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF3B82F6).withOpacity(0.05),
-                        const Color(0xFF1E40AF).withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF3B82F6).withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
+                ...cartItems
+                    .map(
+                      (item) => Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF3B82F6).withOpacity(0.05),
+                              const Color(0xFF1E40AF).withOpacity(0.05),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFF3B82F6).withOpacity(0.2),
+                            width: 1.5,
+                          ),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: item.imageUrl != null
-                              ? Image.network(
-                                  item.imageUrl!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: const Color(0xFF3B82F6).withOpacity(0.1),
-                                      child: const Icon(
-                                        Icons.image_not_supported_outlined,
-                                        color: Color(0xFF3B82F6),
-                                        size: 24,
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  color: const Color(0xFF3B82F6).withOpacity(0.1),
-                                  child: const Icon(
-                                    Icons.image,
-                                    color: Color(0xFF3B82F6),
-                                    size: 24,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Text(
-                              item.equipmentName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E293B),
-                                fontFamily: 'Alexandria',
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child:
+                                    item.imageUrl != null
+                                        ? Image.network(
+                                          item.imageUrl!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (
+                                            context,
+                                            error,
+                                            stackTrace,
+                                          ) {
+                                            return Container(
+                                              color: const Color(
+                                                0xFF3B82F6,
+                                              ).withOpacity(0.1),
+                                              child: const Icon(
+                                                Icons
+                                                    .image_not_supported_outlined,
+                                                color: Color(0xFF3B82F6),
+                                                size: 24,
+                                              ),
+                                            );
+                                          },
+                                        )
+                                        : Container(
+                                          color: const Color(
+                                            0xFF3B82F6,
+                                          ).withOpacity(0.1),
+                                          child: const Icon(
+                                            Icons.image,
+                                            color: Color(0xFF3B82F6),
+                                            size: 24,
+                                          ),
+                                        ),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Quantity: ${item.quantity}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF64748B),
-                                fontFamily: 'Alexandria',
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.equipmentName,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF1E293B),
+                                      fontFamily: 'Alexandria',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Quantity: ${item.quantity}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF64748B),
+                                      fontFamily: 'Alexandria',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _formatRupiah(item.totalPrice.toDouble()),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF3B82F6),
+                                      fontFamily: 'Alexandria',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _formatRupiah(item.totalPrice.toDouble()),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF3B82F6),
-                                fontFamily: 'Alexandria',
+                            GestureDetector(
+                              onTap:
+                                  () =>
+                                      _showDeleteConfirmation(context, item.id),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFEBEE),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.delete_outline,
+                                  color: Color(0xFFE53E3E),
+                                  size: 20,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => _showDeleteConfirmation(context, item.id),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFEBEE),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.delete_outline,
-                            color: Color(0xFFE53E3E),
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )).toList(),
+                    )
+                    .toList(),
             ],
           ),
         );
@@ -581,8 +587,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Shipping Options', Icons.local_shipping, color: const Color(0xFFF59E0B)),
-          
+          _buildSectionHeader(
+            'Shipping Options',
+            Icons.local_shipping,
+            color: const Color(0xFFF59E0B),
+          ),
+
           // Shipping Methods (Delivery or Pickup)
           Row(
             children: [
@@ -607,13 +617,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               ),
             ],
           ),
-          
+
           // Show delivery options only if Delivery is selected
           if (_shippingMethod == 'Delivery') ...[
             const SizedBox(height: 20),
             const Divider(color: Color(0xFFE2E8F0)),
             const SizedBox(height: 20),
-            
+
             // Delivery Options
             _buildShippingOption(
               'Reguler (Tomorrow Arrive)',
@@ -621,7 +631,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               'FREE',
               Icons.access_time,
               _deliveryOption == 'Reguler (Tomorrow Arrive)',
-              () => setState(() => _deliveryOption = 'Reguler (Tomorrow Arrive)'),
+              () =>
+                  setState(() => _deliveryOption = 'Reguler (Tomorrow Arrive)'),
             ),
             const SizedBox(height: 12),
             _buildShippingOption(
@@ -638,22 +649,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildShippingOption(String title, String subtitle, String price, IconData icon, bool selected, VoidCallback onTap) {
+  Widget _buildShippingOption(
+    String title,
+    String subtitle,
+    String price,
+    IconData icon,
+    bool selected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: selected 
-              ? LinearGradient(
-                  colors: [
-                    const Color(0xFFF59E0B).withOpacity(0.1),
-                    const Color(0xFFD97706).withOpacity(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
+          gradient:
+              selected
+                  ? LinearGradient(
+                    colors: [
+                      const Color(0xFFF59E0B).withOpacity(0.1),
+                      const Color(0xFFD97706).withOpacity(0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                  : null,
           color: selected ? null : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -666,9 +685,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: selected 
-                    ? const Color(0xFFF59E0B) 
-                    : const Color(0xFFF59E0B).withOpacity(0.1),
+                color:
+                    selected
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFFF59E0B).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -687,7 +707,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: selected ? const Color(0xFF1E293B) : const Color(0xFF64748B),
+                      color:
+                          selected
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFF64748B),
                       fontFamily: 'Alexandria',
                     ),
                   ),
@@ -706,9 +729,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: price == 'FREE' 
-                    ? const Color(0xFF10B981).withOpacity(0.1)
-                    : const Color(0xFF1E293B).withOpacity(0.1),
+                color:
+                    price == 'FREE'
+                        ? const Color(0xFF10B981).withOpacity(0.1)
+                        : const Color(0xFF1E293B).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -716,7 +740,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: price == 'FREE' ? const Color(0xFF10B981) : const Color(0xFF1E293B),
+                  color:
+                      price == 'FREE'
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFF1E293B),
                   fontFamily: 'Alexandria',
                 ),
               ),
@@ -728,18 +755,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected ? const Color(0xFFF59E0B) : const Color(0xFFCBD5E1),
+                  color:
+                      selected
+                          ? const Color(0xFFF59E0B)
+                          : const Color(0xFFCBD5E1),
                   width: 2,
                 ),
                 color: selected ? const Color(0xFFF59E0B) : Colors.transparent,
               ),
-              child: selected
-                  ? const Icon(
-                      Icons.check,
-                      size: 12,
-                      color: Colors.white,
-                    )
-                  : null,
+              child:
+                  selected
+                      ? const Icon(Icons.check, size: 12, color: Colors.white)
+                      : null,
             ),
           ],
         ),
@@ -747,22 +774,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildShippingMethodOption(String title, String subtitle, IconData icon, bool selected, VoidCallback onTap) {
+  Widget _buildShippingMethodOption(
+    String title,
+    String subtitle,
+    IconData icon,
+    bool selected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: selected 
-              ? LinearGradient(
-                  colors: [
-                    const Color(0xFFF59E0B).withOpacity(0.1),
-                    const Color(0xFFD97706).withOpacity(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
+          gradient:
+              selected
+                  ? LinearGradient(
+                    colors: [
+                      const Color(0xFFF59E0B).withOpacity(0.1),
+                      const Color(0xFFD97706).withOpacity(0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                  : null,
           color: selected ? null : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -775,9 +809,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: selected 
-                    ? const Color(0xFFF59E0B) 
-                    : const Color(0xFFF59E0B).withOpacity(0.1),
+                color:
+                    selected
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFFF59E0B).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -792,7 +827,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: selected ? const Color(0xFF1E293B) : const Color(0xFF64748B),
+                color:
+                    selected
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFF64748B),
                 fontFamily: 'Alexandria',
               ),
               textAlign: TextAlign.center,
@@ -831,8 +869,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Message for Admin', Icons.message, color: const Color(0xFFEC4899)),
-          
+          _buildSectionHeader(
+            'Message for Admin',
+            Icons.message,
+            color: const Color(0xFFEC4899),
+          ),
+
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -853,7 +895,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               onChanged: (value) => _messageForAdmin = value,
               maxLines: 4,
               decoration: const InputDecoration(
-                hintText: 'Add any special instructions or requests for your rental...',
+                hintText:
+                    'Add any special instructions or requests for your rental...',
                 hintStyle: TextStyle(
                   color: Color(0xFF94A3B8),
                   fontFamily: 'Alexandria',
@@ -891,8 +934,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Payment Method', Icons.payment, color: const Color(0xFF3B82F6)),
-          
+          _buildSectionHeader(
+            'Payment Method',
+            Icons.payment,
+            color: const Color(0xFF3B82F6),
+          ),
+
           // Payment Options
           _buildPaymentOption(
             "Cash On Delivery",
@@ -902,7 +949,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             isSelected: _selectedPaymentMethod == "Cash On Delivery",
           ),
           const SizedBox(height: 16),
-          
+
           _buildPaymentOption(
             "Transfer Bank",
             Icons.account_balance,
@@ -911,7 +958,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             isSelected: _selectedPaymentMethod == "Transfer Bank",
           ),
           const SizedBox(height: 16),
-          
+
           _buildPaymentOption(
             "E-Wallet",
             Icons.account_balance_wallet,
@@ -920,7 +967,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             isSelected: _selectedPaymentMethod == "E-Wallet",
           ),
           const SizedBox(height: 16),
-          
+
           _buildPaymentOption(
             "Debit/Credit Card",
             Icons.credit_card,
@@ -928,7 +975,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             const Color(0xFFF59E0B),
             isSelected: _selectedPaymentMethod == "Debit/Credit Card",
           ),
-          
+
           // Payment Details Section
           if (_selectedPaymentMethod.isNotEmpty) ...[
             const SizedBox(height: 20),
@@ -955,31 +1002,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: isSelected 
-              ? LinearGradient(
-                  colors: [
-                    color.withOpacity(0.1),
-                    color.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
+          gradient:
+              isSelected
+                  ? LinearGradient(
+                    colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                  : null,
           color: isSelected ? null : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? color : const Color(0xFFE2E8F0),
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: color.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           children: [
@@ -989,15 +1035,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               decoration: BoxDecoration(
                 color: isSelected ? color : color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: color.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                boxShadow:
+                    isSelected
+                        ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                        : null,
               ),
               child: Icon(
                 icon,
@@ -1005,38 +1052,41 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                 size: 20,
               ),
             ),
-            
-            const SizedBox(width: 16),              // Payment details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected ? const Color(0xFF1E293B) : const Color(0xFF64748B),
-                        fontFamily: 'Alexandria',
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+
+            const SizedBox(width: 16), // Payment details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color:
+                          isSelected
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFF64748B),
+                      fontFamily: 'Alexandria',
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF94A3B8),
-                        fontFamily: 'Alexandria',
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF94A3B8),
+                      fontFamily: 'Alexandria',
                     ),
-                  ],
-                ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ],
               ),
-            
+            ),
+
             // Selection indicator
             Container(
               width: 24,
@@ -1049,13 +1099,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                 ),
                 color: isSelected ? color : Colors.transparent,
               ),
-              child: isSelected
-                  ? const Icon(
-                      Icons.check,
-                      size: 14,
-                      color: Colors.white,
-                    )
-                  : null,
+              child:
+                  isSelected
+                      ? const Icon(Icons.check, size: 14, color: Colors.white)
+                      : null,
             ),
           ],
         ),
@@ -1074,7 +1121,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           "• Pay directly to delivery person",
           "• Exact amount required",
           "• No additional charges",
-        ]
+        ],
       },
       "Transfer Bank": {
         "title": "Bank Transfer",
@@ -1085,7 +1132,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           "• Bank: BCA",
           "• Account: 1234567890",
           "• Name: Atap Bumi Camping",
-        ]
+        ],
       },
       "E-Wallet": {
         "title": "Digital Wallet",
@@ -1096,7 +1143,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           "• Supports: GoPay, OVO, DANA",
           "• Instant payment",
           "• Secure transaction",
-        ]
+        ],
       },
       "Debit/Credit Card": {
         "title": "Card Payment",
@@ -1107,7 +1154,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           "• Visa, Mastercard accepted",
           "• Secure SSL encryption",
           "• 3D Secure verification",
-        ]
+        ],
       },
     };
 
@@ -1175,20 +1222,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
-          ...((info["details"] as List<String>).map((detail) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text(
-              detail,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF64748B),
-                fontFamily: 'Alexandria',
-              ),
-            ),
-          )).toList()),
+
+          ...((info["details"] as List<String>)
+              .map(
+                (detail) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    detail,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                      fontFamily: 'Alexandria',
+                    ),
+                  ),
+                ),
+              )
+              .toList()),
         ],
       ),
     );
@@ -1198,7 +1249,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
     return Consumer<CartProvider>(
       builder: (context, cartProvider, child) {
         final subtotal = cartProvider.cartItems.fold<double>(
-          0.0, 
+          0.0,
           (sum, item) => sum + item.totalPrice.toDouble(),
         );
         final shippingFee = _getShippingFee();
@@ -1279,9 +1330,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Checkout Button
               ScaleTransition(
                 scale: _pulseAnimation,
@@ -1289,23 +1340,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: cartProvider.cartItems.isNotEmpty
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PaymentProcessScreen(
-                                  total: total,
-                                  paymentMethod: _selectedPaymentMethod,
-                                  shippingMethod: _shippingMethod,
-                                  deliveryOption: _deliveryOption,
-                                  messageForAdmin: _messageForAdmin,
-                                  cartItems: cartProvider.selectedItems,
+                    onPressed:
+                        cartProvider.cartItems.isNotEmpty
+                            ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => PaymentProcessScreen(
+                                        total: total,
+                                        paymentMethod: _selectedPaymentMethod,
+                                        shippingMethod: _shippingMethod,
+                                        deliveryOption: _deliveryOption,
+                                        messageForAdmin: _messageForAdmin,
+                                        cartItems: cartProvider.selectedItems,
+                                      ),
                                 ),
-                              ),
-                            );
-                          }
-                        : null,
+                              );
+                            }
+                            : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
@@ -1316,20 +1369,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                     ),
                     child: Ink(
                       decoration: BoxDecoration(
-                        gradient: cartProvider.cartItems.isNotEmpty
-                            ? const LinearGradient(
-                                colors: [Color(0xFF7CB342), Color(0xFF8BC34A)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : LinearGradient(
-                                colors: [
-                                  const Color(0xFF94A3B8).withOpacity(0.5),
-                                  const Color(0xFF64748B).withOpacity(0.5),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                        gradient:
+                            cartProvider.cartItems.isNotEmpty
+                                ? const LinearGradient(
+                                  colors: [
+                                    Color(0xFF7CB342),
+                                    Color(0xFF8BC34A),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                                : LinearGradient(
+                                  colors: [
+                                    const Color(0xFF94A3B8).withOpacity(0.5),
+                                    const Color(0xFF64748B).withOpacity(0.5),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Container(
@@ -1344,7 +1401,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              cartProvider.cartItems.isNotEmpty 
+                              cartProvider.cartItems.isNotEmpty
                                   ? 'Pay with $_selectedPaymentMethod'
                                   : 'Add Items to Cart',
                               style: const TextStyle(
@@ -1398,72 +1455,79 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
   void _showOrderSummaryDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF7CB342).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.receipt,
-                color: Color(0xFF7CB342),
-                size: 20,
-              ),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(width: 12),
-            const Text(
-              'Order Summary',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
-                fontFamily: 'Alexandria',
-              ),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7CB342).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.receipt,
+                    color: Color(0xFF7CB342),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Order Summary',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1E293B),
+                    fontFamily: 'Alexandria',
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  _buildSummaryInfoRow('Delivery Method', _shippingMethod),
-                  if (_shippingMethod == 'Delivery')
-                    _buildSummaryInfoRow('Shipping Option', _deliveryOption),
-                  _buildSummaryInfoRow('Payment Method', _selectedPaymentMethod),
-                  if (_messageForAdmin.isNotEmpty)
-                    _buildSummaryInfoRow('Message', _messageForAdmin),
-                ],
-              ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSummaryInfoRow('Delivery Method', _shippingMethod),
+                      if (_shippingMethod == 'Delivery')
+                        _buildSummaryInfoRow(
+                          'Shipping Option',
+                          _deliveryOption,
+                        ),
+                      _buildSummaryInfoRow(
+                        'Payment Method',
+                        _selectedPaymentMethod,
+                      ),
+                      if (_messageForAdmin.isNotEmpty)
+                        _buildSummaryInfoRow('Message', _messageForAdmin),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(
-                color: Color(0xFF7CB342),
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Alexandria',
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(
+                    color: Color(0xFF7CB342),
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Alexandria',
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1498,16 +1562,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
   }
 
   double _getShippingFee() {
-    return _shippingMethod == 'Pickup' 
-        ? 0.0 
+    return _shippingMethod == 'Pickup'
+        ? 0.0
         : (_deliveryOption == 'Express (Same Day)' ? 25000.0 : 0.0);
   }
 
   String _formatRupiah(double amount) {
-    return 'Rp ${amount.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match match) => '${match[1]}.',
-    )}';
+    return 'Rp ${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match match) => '${match[1]}.')}';
   }
 
   void _showDeleteConfirmation(BuildContext context, String itemId) {
@@ -1561,7 +1622,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1585,7 +1649,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFE53E3E),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1611,11 +1678,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
       SnackBar(
         content: Row(
           children: [
-            const Icon(
-              Icons.info,
-              color: Colors.white,
-              size: 20,
-            ),
+            const Icon(Icons.info, color: Colors.white, size: 20),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
