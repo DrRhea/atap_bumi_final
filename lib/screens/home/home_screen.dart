@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/equipment_provider.dart';
+// import '../../providers/equipment_provider.dart';  // Commented out as it's currently unused
 import '../../widgets/bottom_navigation_bar.dart';
 import '../../widgets/home/home_header.dart';
 import '../../widgets/home/search_bar.dart';
 import '../../widgets/home/category_grid.dart';
 import '../../widgets/home/featured_products_section.dart';
-import '../../widgets/home/section_header.dart';
-import '../category/category_screen.dart';
+// import '../../widgets/home/section_header.dart';  // Commented out as it's only used in commented sections
+// import '../category/category_screen.dart';  // Commented out as it's only needed for recommendation section
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,23 +61,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(height: screenHeight * 0.025),
                         
                         CategoryGrid(screenWidth: screenWidth),
+                          SizedBox(height: screenHeight * 0.03),
+                        // Commented out "You Might Like" section
+                        // _buildRecommendationSection(screenWidth, screenHeight),
                         
-                        SizedBox(height: screenHeight * 0.03),
+                        // SizedBox(height: screenHeight * 0.03),
                         
-                        _buildRecommendationSection(screenWidth, screenHeight),
-                        
-                        SizedBox(height: screenHeight * 0.03),
-
                         FeaturedProductsSection(
                           screenWidth: screenWidth,
                           maxProducts: 12,
                         ),
                         
-                        SizedBox(height: screenHeight * 0.03),
-
-                        _buildArticlesSection(screenWidth, screenHeight),
-                        
                         SizedBox(height: screenHeight * 0.02),
+                        
+                        // Commented out Outdoor Articles section
+                        // _buildArticlesSection(screenWidth, screenHeight),
                       ],
                     ),
                   ),
@@ -90,7 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 0),
     );
   }
-
+  // Commented out "You Might Like" section
+  /*
   Widget _buildRecommendationSection(double screenWidth, double screenHeight) {
     final packages = [
       {
@@ -160,7 +159,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-
+  */
+  // Commented out Package Card widget
+  /*
   Widget _buildPackageCard({
     required String title,
     required String price,
@@ -287,7 +288,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
+  */  // Commented out Outdoor Articles section
+  /*
   Widget _buildArticlesSection(double screenWidth, double screenHeight) {
     final articles = [
       {
@@ -352,7 +354,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-
+  */
+  // Commented out Article Card widget
+  /*
   Widget _buildArticleCard({
     required String title,
     required String description,
@@ -474,7 +478,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  */
 
+  // Commented out navigation methods
+  /*
   void _navigateToArticles() {
     debugPrint('Navigate to articles');
     // TODO: Implement navigation to articles page
@@ -494,4 +501,5 @@ class _HomeScreenState extends State<HomeScreen> {
     //   ),
     // );
   }
+  */
 }
